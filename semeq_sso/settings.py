@@ -213,8 +213,8 @@ LOGGING = {
 # SAML mapeamento de atributos para Azure AD
 SAML_ATTRIBUTE_MAPPING = {
     'name': ('username',),
-    'givenName': ('first_name',),
+    'givenname': ('first_name',),
     'surname': ('last_name',),
-    'emailAddress': ('email',),
+    'emailaddress': ('email',),
 }
 SAML_USE_NAME_ID_AS_USERNAME = False
