@@ -210,11 +210,11 @@ LOGGING = {
     },
 }
 
-# SAML mapeamento de atributos para Azure AD
+# SAML mapeamento de atributos para Azure AD (friendly names)
 SAML_ATTRIBUTE_MAPPING = {
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': ('username',),
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname': ('first_name',),
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname': ('last_name',),
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': ('email',),
+    'name': ('username',),
+    'givenName': ('first_name',),
+    'surname': ('last_name',),
+    'emailAddress': ('email',),
 }
 SAML_USE_NAME_ID_AS_USERNAME = False
