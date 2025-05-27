@@ -49,9 +49,22 @@ INSTALLED_APPS = [
     'djangosaml2',
 ]
 
+# Middleware para garantir que a sessão está inicializada antes do SAML
+class EnsureSessionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not hasattr(request, 'session'):
+            from django.contrib.sessions.middleware import SessionMiddleware
+            SessionMiddleware().process_request(request)
+        return self.get_response(request)
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'semeq_sso.settings.EnsureSessionMiddleware',  # Garante sessão antes do SAML
+    'djangosaml2.middleware.SamlSessionMiddleware',  # Necessário para SAML funcionar
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
