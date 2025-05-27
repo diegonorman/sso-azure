@@ -26,7 +26,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dga^#&+du$kr$q$_#zaxy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['azure.semeq.com', 'semeq-sso.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'azure.semeq.com',
+    'semeq-sso.onrender.com',
+    'sso-azure.onrender.com',  # novo domínio do Render
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
