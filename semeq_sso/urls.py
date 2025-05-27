@@ -19,6 +19,7 @@ from django.urls import path, include
 from authentication import views as auth_views
 
 urlpatterns = [
+    path('', auth_views.custom_login, name='root_login'),  # Redireciona / para login
     path('admin/', admin.site.urls),
     path('login/', auth_views.custom_login, name='login'),
     path('logout/', auth_views.custom_logout, name='logout'),
