@@ -1,0 +1,4 @@
+Django
+python3-saml
+djangosaml2
+django-bootstrap-v5
