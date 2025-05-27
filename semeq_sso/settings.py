@@ -157,7 +157,7 @@ SAML_CONFIG = {
     'metadata': {
         'remote': [
             {
-                'url': 'https://login.microsoftonline.com/dfb62140-482c-45ad-9078-5833ff72dcd2/federationmetadata/2007-06/federationmetadata.xml',
+                'url': 'https://login.microsoftonline.com/6e89e984-81f7-4e1d-b40b-d638ccf7c2b0/federationmetadata/2007-06/federationmetadata.xml',
             },
         ],
     },
