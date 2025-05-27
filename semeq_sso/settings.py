@@ -21,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dga^#&+du$kr$q$_#zaxy&nbi55=q0qbop=8t@wiu%$m%(e1qr'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dga^#&+du$kr$q$_#zaxy&nbi55=q0qbop=8t@wiu%$m%(e1qr')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['azure.semeq.com', 'semeq-sso.onrender.com', 'localhost', '127.0.0.1']
 
