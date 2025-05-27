@@ -25,4 +25,5 @@ urlpatterns = [
     path('logout/', auth_views.custom_logout, name='logout'),
     path('dashboard/', auth_views.dashboard, name='dashboard'),
     path('sso/', include('djangosaml2.urls')),
+    path('sso/acs', include('djangosaml2.urls')),  # Aceita POST sem barra final para compatibilidade total
 ]
