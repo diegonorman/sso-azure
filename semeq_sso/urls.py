@@ -24,5 +24,6 @@ urlpatterns = [
     path('login/', auth_views.custom_login, name='login'),
     path('logout/', auth_views.custom_logout, name='logout'),
     path('dashboard/', auth_views.dashboard, name='dashboard'),
+    path('sso/acs', include('djangosaml2.urls')),  # aceita /sso/acs sem barra
     path('sso/', include('djangosaml2.urls')),
 ]
