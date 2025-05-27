@@ -160,7 +160,7 @@ SAML_CONFIG = {
         'sp': {
             'endpoints': {
                 'assertion_consumer_service': [
-                    ('https://azure.semeq.com/sso/acs', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                    ('https://azure.semeq.com/sso/acs/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
                 ],
                 'single_logout_service': [
                     ('https://azure.semeq.com/logout', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
