@@ -174,7 +174,11 @@ SAML_CONFIG = {
         },
     },
     'metadata': {
-        'local': [os.path.join(BASE_DIR, 'azure_metadata.xml')],
+        'remote': [
+            {
+                'url': 'https://login.microsoftonline.com/6e89e984-81f7-4e1d-b40b-d638ccf7c2b0/federationmetadata/2007-06/federationmetadata.xml',
+            }
+        ],
     },
     'debug': True,
     'key_file': '',  # Adicione o caminho do certificado se necessário
