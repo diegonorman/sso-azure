@@ -185,3 +185,5 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'djangosaml2.backends.Saml2Backend',
 ]
+
+APPEND_SLASH = False
