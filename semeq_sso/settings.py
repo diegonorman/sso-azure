@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'django_bootstrap_v5',  # nome correto do app
+    'django_bootstrap5',  # nome correto do app
     'djangosaml2',
 ]
 
