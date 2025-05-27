@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <img src="https://www.semeq.com.br/wp-content/uploads/2021/07/logo-semeq-azul.png" alt="Logo SEMEQ" style="max-width: 220px; margin-bottom: 2rem;">
+    <div class="alert alert-danger" role="alert">
+        <h2>Erro de autenticação SSO</h2>
+        <p>
+            Não foi possível autenticar seu acesso via Azure AD.<br>
+            <strong>Motivos comuns:</strong>
+        </p>
+        <ul class="text-start mx-auto" style="max-width: 400px;">
+            <li>Seu usuário não está cadastrado ou autorizado no Azure AD da SEMEQ.</li>
+            <li>Você tentou acessar com uma conta pessoal ou de outro domínio.</li>
+            <li>Houve um erro temporário na autenticação.</li>
+        </ul>
+        <p>Se você acredita que deveria ter acesso, entre em contato com o administrador SEMEQ.</p>
+        <a href="/login/" class="btn btn-primary mt-3">Voltar para o login</a>
+    </div>
+</div>
+{% endblock %}

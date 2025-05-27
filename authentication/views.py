@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Página de login personalizada
 
@@ -28,3 +29,7 @@ def custom_logout(request):
 @login_required
 def dashboard(request):
     return render(request, 'authentication/dashboard.html')
+
+def sso_error(request):
+    """View para exibir erro amigável de SSO."""
+    return render(request, 'authentication/sso_error.html')

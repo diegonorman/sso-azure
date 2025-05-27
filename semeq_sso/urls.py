@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from authentication import views as auth_views
+from authentication import views
 
 urlpatterns = [
     path('', auth_views.custom_login, name='root_login'),  # Redireciona / para login
@@ -26,4 +27,5 @@ urlpatterns = [
     path('dashboard/', auth_views.dashboard, name='dashboard'),
     path('sso/', include('djangosaml2.urls')),
     path('sso/acs', include('djangosaml2.urls')),  # Aceita POST sem barra final para compatibilidade total
+    path('sso/error/', views.sso_error, name='sso_error'),
 ]

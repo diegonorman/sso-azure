@@ -224,3 +224,6 @@ SAML_ATTRIBUTE_MAPPING = {
     'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': ('email',),
 }
 SAML_USE_NAME_ID_AS_USERNAME = False
+
+# Redireciona falhas de SSO para tela amigável
+SAML_FAILURE_REDIRECT = '/sso/error/'
