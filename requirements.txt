@@ -1,5 +1,5 @@
 Django
 python3-saml
-djangosaml2
+djangosaml2>=1.10.1
 django-bootstrap5
 gunicorn
