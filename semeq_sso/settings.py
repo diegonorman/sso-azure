@@ -169,8 +169,8 @@ SAML_CONFIG = {
             'allow_unsolicited': True,
             'authn_requests_signed': False,
             'logout_requests_signed': True,
-            'want_assertions_signed': True,
-            'want_response_signed': False,
+            'want_assertions_signed': False,  # Azure AD não assina Assertion
+            'want_response_signed': True,    # Azure AD assina o Response
         },
     },
     'metadata': {
