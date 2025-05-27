@@ -191,3 +191,24 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 APPEND_SLASH = False
+
+# LOGGING detalhado para SAML
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'djangosaml2': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'saml2': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
