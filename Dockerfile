@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+# Instala dependências de sistema necessárias para o SAML
+RUN apt-get update && \
+    apt-get install -y libxml2-dev libxmlsec1-dev pkg-config xmlsec1 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+CMD ["gunicorn", "semeq_sso.wsgi:application", "--bind", "0.0.0.0:8000"]
