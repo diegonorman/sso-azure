@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-dga^#&+du$kr$q$_#zaxy&nbi55=q0qbop=8t@wiu%$m%(e1qr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['azure.semeq.com', 'semeq-sso.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
