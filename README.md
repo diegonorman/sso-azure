@@ -173,13 +173,128 @@ django-bootstrap5
 
 ---
 
-## Por que foi feito assim?
+## Guia detalhado: Como implementar SSO Azure AD SAML em outro projeto Django ou Python
 
-- **Segurança**: Centralização de segredos, SSL, cookies seguros, HSTS, assinatura SAML.
-- **Facilidade de replicação**: Separação de variáveis sensíveis, documentação clara, uso de padrões do Django.
-- **Compatibilidade**: Mapeamento flexível de atributos SAML para Azure AD e outros IdPs.
-- **UX**: Login bonito, responsivo, com tratamento de erros e identidade visual.
+### 1. Dependências
+Adicione ao seu `requirements.txt`:
+```
+Django
+djangosaml2
+python3-saml
+django-bootstrap5
+gunicorn
+```
+
+### 2. Configuração do Azure AD
+- No portal Azure, crie um novo "Aplicativo Empresarial" do tipo SAML.
+- Defina as URLs:
+  - **ACS (Assertion Consumer Service):** `https://SEU_DOMINIO/sso/acs/`
+  - **Logout:** `https://SEU_DOMINIO/logout`
+  - **EntityID:** `https://SEU_DOMINIO/sso/metadata`
+- Copie a URL de metadata gerada pelo Azure AD para usar no seu `.env`.
+- No Azure, configure os atributos de saída para garantir que `name`, `givenName`, `surname`, `emailAddress` estejam presentes.
+
+### 3. Variáveis de ambiente (.env)
+Exemplo:
+```env
+AZURE_SSO_ACS=https://SEU_DOMINIO/sso/acs/
+AZURE_SSO_LOGOUT=https://SEU_DOMINIO/logout
+AZURE_SSO_METADATA_URL=https://login.microsoftonline.com/SEU_TENANT_ID/federationmetadata/2007-06/federationmetadata.xml?appid=SEU_APP_ID
+SECRET_KEY=sua-secret-key
+ALLOWED_HOSTS=SEU_DOMINIO,localhost,127.0.0.1
+```
+
+### 4. settings.py
+- Adicione `'djangosaml2'` e `'django_bootstrap5'` ao `INSTALLED_APPS`.
+- Configure o SAML conforme exemplo abaixo:
+```python
+SAML_CONFIG = {
+    'xmlsec_binary': '/usr/bin/xmlsec1',
+    'entityid': os.environ.get('AZURE_SSO_ENTITYID', 'https://SEU_DOMINIO/sso/metadata'),
+    'service': {
+        'sp': {
+            'endpoints': {
+                'assertion_consumer_service': [
+                    (os.environ.get('AZURE_SSO_ACS'), 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                ],
+                'single_logout_service': [
+                    (os.environ.get('AZURE_SSO_LOGOUT'), 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
+                ],
+            },
+            'allow_unsolicited': True,
+            'authn_requests_signed': False,
+            'logout_requests_signed': True,
+            'want_assertions_signed': True,
+            'want_response_signed': False,
+        },
+    },
+    'metadata': {
+        'remote': [
+            {'url': os.environ.get('AZURE_SSO_METADATA_URL')}
+        ],
+    },
+    'debug': True,
+    'key_file': '',
+    'cert_file': '',
+}
+SAML_ATTRIBUTE_MAPPING = {
+    'name': ('username',),
+    'givenName': ('first_name',),
+    'surname': ('last_name',),
+    'emailAddress': ('email',),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': ('username',),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname': ('first_name',),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname': ('last_name',),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': ('email',),
+}
+SAML_USE_NAME_ID_AS_USERNAME = False
+SAML_FAILURE_REDIRECT = '/sso/error/'
+```
+
+### 5. URLs
+No seu `urls.py`:
+```python
+from django.urls import path, include
+from authentication import views as auth_views
+urlpatterns = [
+    path('', auth_views.custom_login, name='root_login'),
+    path('login/', auth_views.custom_login, name='login'),
+    path('logout/', auth_views.custom_logout, name='logout'),
+    path('dashboard/', auth_views.dashboard, name='dashboard'),
+    path('sso/', include('djangosaml2.urls')),
+    path('sso/acs', include('djangosaml2.urls')),
+    path('sso/error/', auth_views.sso_error, name='sso_error'),
+]
+```
+
+### 6. Views
+Exemplo de views para login local, logout, dashboard e erro SSO:
+```python
+def custom_login(request): ...
+def custom_logout(request): ...
+@login_required
+def dashboard(request): ...
+def sso_error(request): ...
+```
+
+### 7. Templates
+- `login.html`: Tela de login local com Bootstrap e logo.
+- `sso_error.html`: Mensagem amigável para falha de SSO.
+- `dashboard.html`: Tela pós-login.
+- `base.html`: Layout base com Bootstrap e navbar.
+
+### 8. Docker e Deploy (opcional)
+- Use o `Dockerfile` e `build.sh` como exemplo para deploy automatizado.
+- O Dockerfile já instala dependências de sistema para SAML.
+
+### 9. Teste o fluxo
+- Faça login local e via SSO Azure AD.
+- Teste o tratamento de erros e o redirecionamento amigável.
 
 ---
 
-Se quiser um passo a passo ainda mais detalhado para outro projeto Django ou Python, posso gerar um guia específico!
+**Dica:**
+Se precisar de assinatura de AuthnRequest, gere um par de chaves PEM e configure no settings e no Azure AD.
+
+Pronto! Com esse guia, você consegue adaptar o SSO Azure AD/SAML para qualquer projeto Django ou Python moderno.
+
