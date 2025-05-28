@@ -2,28 +2,46 @@
 
 ## O que foi configurado
 
-### 1. Autenticação Local e SSO Azure AD
-- Login local (usuário/senha) e login via SSO Azure AD usando SAML 2.0.
-- Backend SAML com `djangosaml2`, integrando Django e Azure AD.
-
-### 2. Segurança
+- Autenticação local personalizada e SSO Azure AD via SAML 2.0.
+- Backend SAML com `djangosaml2`.
 - Variáveis sensíveis (SECRET_KEY, ALLOWED_HOSTS, URLs SAML) centralizadas no `.env`.
-- Configurações de produção: SSL obrigatório, cookies seguros, HSTS, XSS, etc.
-- SAML configurado para aceitar apenas respostas esperadas (`allow_unsolicited=False`), exigir assertions assinadas e requests assinadas (se necessário, com chave/certificado local).
-
-### 3. Design e UX
-- Interface responsiva e moderna com Bootstrap.
-- Tela de login customizada com logo SEMEQ e tratamento amigável de erros SSO.
-
-### 4. Documentação e Replicação
-- README detalhado com deploy, variáveis, segurança e como replicar o SSO em outros projetos Django.
+- Segurança: SSL obrigatório, cookies seguros, HSTS, XSS, etc.
+- Interface responsiva com Bootstrap e tela de login customizada.
+- Dockerfile e build.sh para deploy automatizado.
+- README detalhado para replicação do SSO em outros projetos Django.
 
 ---
 
-## Como foi configurado
+## Como rodar localmente
 
-### Dependências
-No `requirements.txt`:
+1. Instale as dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Execute as migrações:
+   ```bash
+   python manage.py migrate
+   ```
+3. Crie o usuário admin:
+   ```bash
+   python manage.py createsuperuser --username admin --email admin@semeq.com
+   # Use a senha: admin
+   ```
+4. Rode o servidor:
+   ```bash
+   python manage.py runserver
+   ```
+
+Acesse http://localhost:8000 para testar.
+
+---
+
+## SSO Azure AD
+
+- Configure as URLs SAML no Azure conforme abaixo.
+- Domínio de produção: https://azure.semeq.com
+
+### Dependências (requirements.txt)
 ```
 Django==4.2.21
 python3-saml
@@ -36,30 +54,42 @@ gunicorn
 ```env
 AZURE_SSO_ACS=https://azure.semeq.com/sso/acs/
 AZURE_SSO_LOGOUT=https://azure.semeq.com/logout
-AZURE_SSO_METADATA_URL=https://login.microsoftonline.com/SEU_TENANT_ID/federationmetadata/2007-06/federationmetadata.xml?appid=SEU_APP_ID
-SECRET_KEY=sua-secret-key
+AZURE_SSO_METADATA_URL=https://login.microsoftonline.com/6e89e984-81f7-4e1d-b40b-d638ccf7c2b0/federationmetadata/2007-06/federationmetadata.xml?appid=dfb62140-482c-45ad-9078-5833ff72dcd2
+SECRET_KEY=django-insecure-dga^#&+du$kr$q$_#zaxy&nbi55=q0qbop=8t@wiu%$m%(e1qr)
 ALLOWED_HOSTS=azure.semeq.com,semeq-sso.onrender.com,sso-azure.onrender.com,localhost,127.0.0.1
 ```
 
 ### settings.py (principais pontos)
-- Carrega variáveis do `.env` via `os.environ`.
-- Configura o SAML:
+- Configuração de autenticação local e SSO SAML:
   ```python
+  INSTALLED_APPS = [
+      ...
+      'authentication',
+      'django_bootstrap5',
+      'djangosaml2',
+  ]
+  MIDDLEWARE = [
+      ...
+      'django.contrib.sessions.middleware.SessionMiddleware',
+      'semeq_sso.settings.EnsureSessionMiddleware',
+      'djangosaml2.middleware.SamlSessionMiddleware',
+      ...
+  ]
   SAML_CONFIG = {
       'xmlsec_binary': '/usr/bin/xmlsec1',
-      'entityid': os.environ.get('AZURE_SSO_ENTITYID'),
+      'entityid': 'https://azure.semeq.com/sso/metadata',
       'service': {
           'sp': {
               'endpoints': {
                   'assertion_consumer_service': [
-                      (os.environ.get('AZURE_SSO_ACS'), 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
+                      ('https://azure.semeq.com/sso/acs/', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'),
                   ],
                   'single_logout_service': [
-                      (os.environ.get('AZURE_SSO_LOGOUT'), 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
+                      ('https://azure.semeq.com/logout', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'),
                   ],
               },
-              'allow_unsolicited': False,
-              'authn_requests_signed': False,  # True se usar chave/certificado local
+              'allow_unsolicited': True,
+              'authn_requests_signed': False,
               'logout_requests_signed': True,
               'want_assertions_signed': True,
               'want_response_signed': False,
@@ -67,76 +97,79 @@ ALLOWED_HOSTS=azure.semeq.com,semeq-sso.onrender.com,sso-azure.onrender.com,loca
       },
       'metadata': {
           'remote': [
-              {'url': os.environ.get('AZURE_SSO_METADATA_URL')}
+              {'url': 'https://login.microsoftonline.com/6e89e984-81f7-4e1d-b40b-d638ccf7c2b0/federationmetadata/2007-06/federationmetadata.xml?appid=dfb62140-482c-45ad-9078-5833ff72dcd2'}
           ],
       },
-      'debug': False,
-      'key_file': '',  # Caminho do PEM se assinar requests
+      'debug': True,
+      'key_file': '',
       'cert_file': '',
   }
-  ```
-- Mapeamento de atributos SAML para Azure AD:
-  ```python
   SAML_ATTRIBUTE_MAPPING = {
       'name': ('username',),
       'givenName': ('first_name',),
       'surname': ('last_name',),
       'emailAddress': ('email',),
-      # fallback URIs
       'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': ('username',),
       'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname': ('first_name',),
       'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname': ('last_name',),
       'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': ('email',),
   }
-  ```
-- Redirecionamento de falhas SSO:
-  ```python
+  SAML_USE_NAME_ID_AS_USERNAME = False
   SAML_FAILURE_REDIRECT = '/sso/error/'
   ```
+- URLs principais:
+  ```python
+  urlpatterns = [
+      path('', auth_views.custom_login, name='root_login'),
+      path('admin/', admin.site.urls),
+      path('login/', auth_views.custom_login, name='login'),
+      path('logout/', auth_views.custom_logout, name='logout'),
+      path('dashboard/', auth_views.dashboard, name='dashboard'),
+      path('sso/', include('djangosaml2.urls')),
+      path('sso/acs', include('djangosaml2.urls')),
+      path('sso/error/', views.sso_error, name='sso_error'),
+  ]
+  ```
+- Views principais:
+  ```python
+  def custom_login(request): ...
+  def custom_logout(request): ...
+  @login_required
+def dashboard(request): ...
+  def sso_error(request): ...
+  ```
+- Templates:
+  - `login.html`: Tela de login local com Bootstrap e logo SEMEQ.
+  - `sso_error.html`: Mensagem amigável para falha de SSO.
+  - `dashboard.html`: Tela pós-login.
+  - `base.html`: Layout base com Bootstrap e navbar SEMEQ.
 
 ---
 
 ## Exemplo: Como implementar SSO Azure AD SAML em outro Django
 
-1. **Adicione as dependências** ao seu `requirements.txt`:
+1. Adicione as dependências ao seu `requirements.txt`:
    ```
    Django
 djangosaml2
 python3-saml
 django-bootstrap5
    ```
-2. **Configure o Azure AD**:
+2. Configure o Azure AD:
    - Crie um “Enterprise Application” do tipo SAML.
    - Configure as URLs de ACS, Logout e Metadata conforme seu domínio.
-   - Exporte o metadata XML do Azure e use a URL no seu `.env`.
-3. **No seu settings.py**:
-   - Importe `os` e leia variáveis do `.env`.
+   - Use a URL de metadata do Azure no seu `.env`.
+3. No seu settings.py:
    - Configure o bloco `SAML_CONFIG` conforme acima.
    - Adicione `'djangosaml2'` ao `INSTALLED_APPS` e configure o backend.
-4. **URLs**:
+4. URLs:
    - Inclua as rotas do djangosaml2:
      ```python
      path('sso/', include('djangosaml2.urls')),
      ```
-5. **Templates**:
+5. Templates:
    - Crie uma tela de login que ofereça login local e via SSO.
    - Crie uma tela amigável para erros SSO.
-6. **(Opcional) Assinatura de AuthnRequest**:
-   - Gere um par de chaves PEM localmente:
-     ```
-     openssl req -x509 -newkey rsa:2048 -keyout saml.key -out saml.crt -days 365 -nodes -subj "/CN=seu-app"
-     ```
-   - Configure no `.env`:
-     ```
-     SAML_KEY_FILE=/caminho/absoluto/saml.key
-     SAML_CERT_FILE=/caminho/absoluto/saml.crt
-     ```
-   - No `settings.py`:
-     ```python
-     'authn_requests_signed': True,
-     'key_file': os.environ.get('SAML_KEY_FILE'),
-     'cert_file': os.environ.get('SAML_CERT_FILE'),
-     ```
 
 ---
 
