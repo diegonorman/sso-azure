@@ -296,5 +296,5 @@ def sso_error(request): ...
 **Dica:**
 Se precisar de assinatura de AuthnRequest, gere um par de chaves PEM e configure no settings e no Azure AD.
 
-Pronto! Com esse guia, você consegue adaptar o SSO Azure AD/SAML para qualquer projeto Django ou Python moderno.
+Pronto! Com esse guia, você consegue adaptar o SSO Azure AD/SAML para qualquer projeto Django ou Python.
 
